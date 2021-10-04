@@ -1,0 +1,24 @@
+plugin 'cocoapods-user-defined-build-types'
+enable_user_defined_build_types!
+require_relative '../node_modules/react-native/scripts/react_native_pods'
+require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
+source 'https://github.com/brightcove/BrightcoveSpecs.git'
+
+platform :ios, '10.0'
+
+target 'BrightcoveExample' do
+  config = use_native_modules!
+
+  use_react_native!(:path => config["reactNativePath"])
+  # use_frameworks!
+  pod 'Brightcove-Player-Core', :build_type => :dynamic_framework
+
+
+  post_install do |installer|
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET'
+      end
+    end
+  end
+end
