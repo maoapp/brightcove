@@ -1,89 +1,46 @@
 //
-//  ViewController.swift
+//  BrightcovePlayerView.swift
 //  VideoCloudBasicPlayer
 //
-//  Copyright © 2020 Brightcove, Inc. All rights reserved.
+//  Created by Mauricio arroyave on 7/10/21.
+//  Copyright © 2021 Brightcove. All rights reserved.
 //
 
 import AVKit
-import AVFoundation
-import Foundation
+import UIKit
 import BrightcovePlayerSDK
 
-let kViewControllerPlaybackServicePolicyKey = "BCpkADawqM2g20ETofxJDhAFvPG1VmaH518NJcDxe9hot9kRYZuetXbFd68kL9SxRISaxAifI8OpG_5k8Fhpo-JVrxa1Tru0P1w5MbPRhXpeEEF8HdRQWJpVmPNT0PUkKlF-kTanqnTf2NHA"
-let kViewControllerAccountID = "6250470670001"
-let kViewControllerVideoID = "6263733021001"
-
-@objc (ViewController)
-class ViewController: UIViewController {
-    @objc var videoId:String?
-    @objc var accountId:String?
-    @objc var policyKey:String?
-
+final class BrightcovePlayerView: RCTView {
     let sharedSDKManager = BCOVPlayerSDKManager.shared()
-    let playbackService = BCOVPlaybackService(accountId: kViewControllerAccountID, policyKey: kViewControllerPlaybackServicePolicyKey)
+    let playbackService = BCOVPlaybackService(accountId: "5434391461001", policyKey: "BCpkADawqM0T8lW3nMChuAbrcunBBHmh4YkNl5e6ZrKQwPiK_Y83RAOF4DP5tyBF_ONBVgrEjqW6fbV0nKRuHvjRU3E8jdT9WMTOXfJODoPML6NUDCYTwTHxtNlr5YdyGYaCPLhMUZ3Xu61L")
     let playbackController :BCOVPlaybackController
     var nowPlayingHandler: NowPlayingHandler?
     var playerView: BCOVPUIPlayerView?
-    weak var currentPlayer: AVPlayer?
-    @IBOutlet weak var videoContainerView: UIView!
-    @IBOutlet weak var muteButton: UIButton!
-    
+    weak var currentPlayer: AVPlayer? 
+    weak var containerView: UIView!
+    weak var videoContainerView: UIView!
     required init?(coder aDecoder: NSCoder) {
-        BCOVGlobalConfiguration.sharedConfig().setValue([
-            "privateUser":"maoarroya@gmail.com",
-            "privateApplication":""
-        ], forKey: "privateSessionAnalytics")
         playbackController = (sharedSDKManager?.createPlaybackController())!
-        
         super.init(coder: aDecoder)
+        
         playbackController.delegate = self
         playbackController.allowsBackgroundAudioPlayback = true
         playbackController.allowsExternalPlayback = true
         playbackController.isAutoPlay = true
+        commonInit()
     }
-    
-    @objc static func requiresMainQueueSetup() -> Bool {
-        return false
-    }
+    override init(frame: CGRect) {
+        playbackController = (sharedSDKManager?.createPlaybackController())!
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        setUpAudioSession()
-        
-        // Set up our player view. Create with a standard VOD layout.
-        let options = BCOVPUIPlayerViewOptions()
-        options.showPictureInPictureButton = true
-        
-        guard let playerView = BCOVPUIPlayerView(playbackController: self.playbackController, options: options, controlsView: BCOVPUIBasicControlView.withVODLayout()) else {
-            return
-        }
-        
-        self.playerView = playerView
-        
-        playerView.delegate = self
-        
-        // Install in the container view and match its size.
-        self.videoContainerView.addSubview(playerView)
-        playerView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            playerView.topAnchor.constraint(equalTo: self.videoContainerView.topAnchor),
-            playerView.rightAnchor.constraint(equalTo: self.videoContainerView.rightAnchor),
-            playerView.leftAnchor.constraint(equalTo: self.videoContainerView.leftAnchor),
-            playerView.bottomAnchor.constraint(equalTo: self.videoContainerView.bottomAnchor)
-        ])
-        
-        // Associate the playerView with the playback controller.
-        playerView.playbackController = playbackController
-        
-        nowPlayingHandler = NowPlayingHandler(withPlaybackController: playbackController)
-        
-        requestContentFromPlaybackService()
+        super.init(frame: frame)
+        commonInit()
+    }
+    func commonInit() {
+        setupVideoPlayer()
     }
     
     func requestContentFromPlaybackService() {
-        playbackService?.findVideo(withVideoID: kViewControllerVideoID, parameters: nil) { (video: BCOVVideo?, jsonResponse: [AnyHashable: Any]?, error: Error?) -> Void in
+        playbackService?.findVideo(withVideoID: "6140448705001", parameters: nil) { (video: BCOVVideo?, jsonResponse: [AnyHashable: Any]?, error: Error?) -> Void in
             
             if let v = video {
                 self.playbackController.setVideos([v] as NSArray)
@@ -123,25 +80,43 @@ class ViewController: UIViewController {
         }
     }
     
-    @IBAction func muteButtonPressed(_ button: UIButton) {
-        guard let currentPlayer = currentPlayer else {
+    func setupVideoPlayer () {
+        setUpAudioSession()
+        
+        // Set up our player view. Create with a standard VOD layout.
+        let options = BCOVPUIPlayerViewOptions()
+        options.showPictureInPictureButton = true
+        
+        guard let playerView = BCOVPUIPlayerView(playbackController: self.playbackController, options: options, controlsView: BCOVPUIBasicControlView.withVODLayout()) else {
             return
         }
         
-        if currentPlayer.isMuted {
-            muteButton?.setTitle("Mute AVPlayer", for: .normal)
-        } else {
-            muteButton?.setTitle("Unmute AVPlayer", for: .normal)
-        }
+        self.playerView = playerView
         
-        currentPlayer.isMuted = !currentPlayer.isMuted
+        playerView.delegate = self
         
-        setUpAudioSession()
+        // Install in the container view and match its size.
+        self.videoContainerView.addSubview(playerView)
+        playerView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            playerView.topAnchor.constraint(equalTo: self.videoContainerView.topAnchor),
+            playerView.rightAnchor.constraint(equalTo: self.videoContainerView.rightAnchor),
+            playerView.leftAnchor.constraint(equalTo: self.videoContainerView.leftAnchor),
+            playerView.bottomAnchor.constraint(equalTo: self.videoContainerView.bottomAnchor)
+        ])
+        
+        // Associate the playerView with the playback controller.
+        playerView.playbackController = playbackController
+        
+        nowPlayingHandler = NowPlayingHandler(withPlaybackController: playbackController)
+        
+        requestContentFromPlaybackService()
     }
-
 }
 
-extension ViewController: BCOVPlaybackControllerDelegate {
+
+
+extension BrightcovePlayerView: BCOVPlaybackControllerDelegate {
     
     func playbackController(_ controller: BCOVPlaybackController!, didAdvanceTo session: BCOVPlaybackSession!) {
         print("Advanced to new session")
@@ -167,7 +142,7 @@ extension ViewController: BCOVPlaybackControllerDelegate {
     
 }
 
-extension ViewController: BCOVPUIPlayerViewDelegate {
+extension BrightcovePlayerView: BCOVPUIPlayerViewDelegate {
     
     func pictureInPictureControllerDidStartPicture(inPicture pictureInPictureController: AVPictureInPictureController) {
         print("pictureInPictureControllerDidStartPicture")
@@ -190,3 +165,4 @@ extension ViewController: BCOVPUIPlayerViewDelegate {
     }
     
 }
+

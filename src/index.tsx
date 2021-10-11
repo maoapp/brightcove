@@ -1,5 +1,5 @@
-import { NativeModules } from 'react-native';
+import { requireNativeComponent } from 'react-native';
 
-const { Brightcove } = NativeModules;
+const Test = requireNativeComponent('RNTBrightcoveView');
 
-export default Brightcove;
+export default Test;
