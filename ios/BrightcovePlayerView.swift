@@ -16,6 +16,9 @@ final class BrightcovePlayerView: RCTView {
     let playbackController :BCOVPlaybackController
     var nowPlayingHandler: NowPlayingHandler?
     var playerView: BCOVPUIPlayerView?
+    @objc var accountId: String = ""
+    private var videoId: String = ""
+    private var policyKey: String = ""
     weak var currentPlayer: AVPlayer? 
     weak var containerView: UIView!
     weak var videoContainerView: UIView!
@@ -49,7 +52,6 @@ final class BrightcovePlayerView: RCTView {
             }
         }
     }
-    
     func setUpAudioSession() {
         var categoryError :NSError?
         var success: Bool
@@ -96,13 +98,13 @@ final class BrightcovePlayerView: RCTView {
         playerView.delegate = self
         
         // Install in the container view and match its size.
-        self.videoContainerView.addSubview(playerView)
+        self.addSubview(playerView)
         playerView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            playerView.topAnchor.constraint(equalTo: self.videoContainerView.topAnchor),
-            playerView.rightAnchor.constraint(equalTo: self.videoContainerView.rightAnchor),
-            playerView.leftAnchor.constraint(equalTo: self.videoContainerView.leftAnchor),
-            playerView.bottomAnchor.constraint(equalTo: self.videoContainerView.bottomAnchor)
+            playerView.topAnchor.constraint(equalTo: self.topAnchor),
+            playerView.rightAnchor.constraint(equalTo: self.rightAnchor),
+            playerView.leftAnchor.constraint(equalTo: self.leftAnchor),
+            playerView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
         ])
         
         // Associate the playerView with the playback controller.
