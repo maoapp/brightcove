@@ -20,9 +20,14 @@ final class BrightcovePlayerView: RCTView {
     @objc var accountId: NSString!
     @objc var videoId: NSString!
     @objc var policyKey: NSString!
+    @objc var userId: NSString!
     
     weak var currentPlayer: AVPlayer? 
     required init?(coder aDecoder: NSCoder) {
+        BCOVGlobalConfiguration.sharedConfig().setValue([
+            "privateUser":userId,
+            "privateApplication":""
+        ], forKey: "privateSessionAnalytics")
        fatalError("init(coder:) has not been implemented")
     }
     
