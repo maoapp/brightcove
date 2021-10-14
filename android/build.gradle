@@ -47,6 +47,7 @@ repositories {
     maven {
         // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
         url("$rootDir/../node_modules/react-native/android")
+        url 'http://repo.brightcove.com/releases'
     }
     google()
     jcenter()
@@ -55,4 +56,5 @@ repositories {
 dependencies {
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"  // From node_modules
+    implementation 'com.brightcove.player:exoplayer2:6.8.0'
 }

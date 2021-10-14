@@ -12,46 +12,53 @@ import BrightcovePlayerSDK
 
 final class BrightcovePlayerView: RCTView {
     let sharedSDKManager = BCOVPlayerSDKManager.shared()
-    let playbackService = BCOVPlaybackService(accountId: "5434391461001", policyKey: "BCpkADawqM0T8lW3nMChuAbrcunBBHmh4YkNl5e6ZrKQwPiK_Y83RAOF4DP5tyBF_ONBVgrEjqW6fbV0nKRuHvjRU3E8jdT9WMTOXfJODoPML6NUDCYTwTHxtNlr5YdyGYaCPLhMUZ3Xu61L")
-    let playbackController :BCOVPlaybackController
+    var playbackService:BCOVPlaybackService?
+    var playbackController :BCOVPlaybackController?
     var nowPlayingHandler: NowPlayingHandler?
     var playerView: BCOVPUIPlayerView?
-    @objc var accountId: String = ""
-    private var videoId: String = ""
-    private var policyKey: String = ""
+    
+    @objc var accountId: NSString!
+    @objc var videoId: NSString!
+    @objc var policyKey: NSString!
+    
     weak var currentPlayer: AVPlayer? 
-    weak var containerView: UIView!
-    weak var videoContainerView: UIView!
     required init?(coder aDecoder: NSCoder) {
-        playbackController = (sharedSDKManager?.createPlaybackController())!
-        super.init(coder: aDecoder)
-        
-        playbackController.delegate = self
-        playbackController.allowsBackgroundAudioPlayback = true
-        playbackController.allowsExternalPlayback = true
-        playbackController.isAutoPlay = true
-        commonInit()
+       fatalError("init(coder:) has not been implemented")
     }
+    
     override init(frame: CGRect) {
-        playbackController = (sharedSDKManager?.createPlaybackController())!
-
         super.init(frame: frame)
-        commonInit()
+        
+        self.playbackController = (sharedSDKManager?.createPlaybackController())!
+        self.playbackController?.delegate = self
+        self.playbackController?.allowsBackgroundAudioPlayback = true
+        self.playbackController?.allowsExternalPlayback = true
+        self.playbackController?.isAutoPlay = true
     }
-    func commonInit() {
-        setupVideoPlayer()
+    
+    override func didSetProps(_ changedProps: [String]!) {
+        refreshVideo()
+    }
+    
+    
+    func refreshVideo() {
+        if self.policyKey != "" && self.accountId != "" && self.videoId != "" {
+            self.playbackService =  BCOVPlaybackService(accountId: self.accountId as String, policyKey: self.policyKey as String) 
+            setupVideoPlayer()
+        }
     }
     
     func requestContentFromPlaybackService() {
-        playbackService?.findVideo(withVideoID: "6140448705001", parameters: nil) { (video: BCOVVideo?, jsonResponse: [AnyHashable: Any]?, error: Error?) -> Void in
+        playbackService?.findVideo(withVideoID: self.videoId as String, parameters: nil) { (video: BCOVVideo?, jsonResponse: [AnyHashable: Any]?, error: Error?) -> Void in
             
             if let v = video {
-                self.playbackController.setVideos([v] as NSArray)
+                self.playbackController?.setVideos([v] as NSArray)
             } else {
                 print("ViewController Debug - Error retrieving video: \(error?.localizedDescription ?? "unknown error")")
             }
         }
     }
+    
     func setUpAudioSession() {
         var categoryError :NSError?
         var success: Bool
@@ -110,7 +117,7 @@ final class BrightcovePlayerView: RCTView {
         // Associate the playerView with the playback controller.
         playerView.playbackController = playbackController
         
-        nowPlayingHandler = NowPlayingHandler(withPlaybackController: playbackController)
+        nowPlayingHandler = NowPlayingHandler(withPlaybackController: playbackController!)
         
         requestContentFromPlaybackService()
     }
