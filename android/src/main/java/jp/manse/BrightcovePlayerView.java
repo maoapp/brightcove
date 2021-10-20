@@ -49,6 +49,7 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
     private String videoId;
     private String referenceId;
     private String videoToken;
+    private String userId;
     private Catalog catalog;
     private OfflineCatalog offlineCatalog;
     private boolean autoPlay = true;
@@ -168,6 +169,11 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
 
     public void setPolicyKey(String policyKey) {
         this.policyKey = policyKey;
+        this.loadVideo();
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
         this.loadVideo();
     }
 

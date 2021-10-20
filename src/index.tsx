@@ -1,5 +1,5 @@
-import { requireNativeComponent } from 'react-native';
+import { requireNativeComponent, Platform } from 'react-native';
 
-const Test = requireNativeComponent('RNTBrightcoveView');
+const NativeModule = Platform.OS === 'ios' ? requireNativeComponent('RNTBrightcoveView') : requireNativeComponent('BrightcovePlayer');
 
-export default Test;
+export default NativeModule;
